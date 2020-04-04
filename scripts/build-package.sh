@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /repobuilder/scripts/ansi-codes.sh
+. /repobuilder/scripts/messages.sh
 
 pkg="$1"
 if [ "${pkg:0:9}" == "packages/" ]; then
@@ -9,12 +9,12 @@ fi
 
 pkgdir="/repobuilder/packages/${pkg}"
 if [ ! -d "${pkgdir}" ]; then
-	echo "${ANSI_RED}[FAIL]${ANSI_RESET} build(${pkg}): No such directory: \"${pkgdir}\"" >&2
+	message FAIL "build(${pkg})" "No such directory: \"${pkgdir}\"" 
 	exit 1
 fi
 
 if [ ! -f "${pkgdir}/${pkg}.spec" ]; then
-	echo "${ANSI_RED}[FAIL]${ANSI_RESET} build(${pkg}): spec file not found: \"${pkgdir}/${pkg}.spec\"" >&2
+	message FAIL "build(${pkg})" "spec file not found: \"${pkgdir}/${pkg}.spec\""
 	exit 1
 fi
 
@@ -35,9 +35,9 @@ rpmbuild -bb --nodebuginfo "./rpmbuild/SPECS/${pkg}.spec" 1> "${pkg}.build.log" 
 if [ "$?" -ne 0 ]; then
 	cp "${pkg}.build.log" /repobuilder/output/
 
-	echo "${ANSI_RED}[FAIL]${ANSI_RESET} build(${pkg}): rpmbuild failed - check the build log for details" >&2
+	message FAIL "build(${pkg})" "rpmbuild failed - check \"${pkg}.build.log\" for details"
 	exit 1
 fi
 
 find ~/rpmbuild/RPMS/ -name '*.rpm' -exec cp '{}' /repobuilder/output/ ';'
-echo "${ANSI_GREEN}[ OK ]${ANSI_RESET} build(${pkg}): Finished successfully"
+message OK "build(${pkg})" "Finished successfully"
