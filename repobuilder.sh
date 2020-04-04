@@ -2,6 +2,7 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+REPOBUILDER_FORCE_CLEAN="0"
 REPOBUILDER_NO_REFRESH="0"
 REPOBUILDER_PARALLEL="0"
 REPOBUILDER_RELEASE=""
@@ -13,6 +14,8 @@ while [ "$#" -gt 0 ]; do
 cat <<EOHELP
 Usage: repobuilder.sh [OPTIONS...]
 Available options (in alphabetical order):
+--force-clean
+  Remove the output directory at the start.
 --help
   Display this help message and exit.
 --no-refresh
@@ -27,10 +30,13 @@ Available options (in alphabetical order):
   The default value is "\$N, \$N-1", where \$N is the release you're running.
 --rm
   Remove the container images after finishing.
+  NOTE: This removes only the rpmbuild images, not the base Fedora images.
 --outernet
   Allow internet access during builds.
 EOHELP
 		exit
+	elif [ "$1" == "--forceclean" ] || [ "$1" == "--force-clean" ]; then
+		REPOBUILDER_FORCE_CLEAN=1
 	elif [ "$1" == "--norefresh" ] || [ "$1" == "--no-refresh" ]; then
 		REPOBUILDER_NO_REFRESH=1
 	elif [ "$1" == "--parallel" ]; then
@@ -61,6 +67,7 @@ if [ "${REPOBUILDER_RELEASE}" == "" ]; then
 	REPOBUILDER_RELEASE="${fedora_current} ${fedora_previous}"
 fi
 
+export REPOBUILDER_FORCE_CLEAN
 export REPOBUILDER_NO_REFRESH
 export REPOBUILDER_PARALLEL
 export REPOBUILDER_RELEASE REPOBUILDER_RM
