@@ -1,6 +1,10 @@
 #!/bin/bash
 
 pkg="$1"
+if [ "${pkg:0:9}" == "packages/" ]; then
+	pkg="${pkg:9:65535}"
+fi
+
 pkgdir="/repobuilder/packages/${pkg}"
 if [ ! -d "${pkgdir}" ]; then
 	echo "No such directory: \"${pkgdir}\"" >&2
