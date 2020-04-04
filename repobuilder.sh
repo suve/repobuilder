@@ -43,6 +43,9 @@ EOHELP
 		REPOBUILDER_RM=1
 	elif [ "$1" == "--outernet" ]; then
 		REPOBUILDER_OUTERNET=1
+	else
+		echo "repobuilder.sh: Unrecognized argument \"$1\""
+		exit 1
 	fi
 
 	shift
