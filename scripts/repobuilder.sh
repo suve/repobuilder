@@ -1,14 +1,13 @@
 #!/bin/bash
 
 cd "$( dirname "${BASH_SOURCE[0]}" )/.."
-. scripts/dist.sh
 . scripts/messages.sh
 
-fedora_current="${fed_ver}"
-fedora_previous="$(expr "${fedora_current}" - 1)"
-unset fed_ver dist
+# -- build images
 
-echo -n "${fedora_current} ${fedora_previous}" | xargs -P 0 -n 1 ./scripts/build-image.sh
+echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/build-image.sh
+
+# -- build packages
 
 message INFO "build" "Building packages..."
 
@@ -17,13 +16,18 @@ message INFO "build" "Building packages..."
 	for pkg in $packages; do
 		pkg="$(basename "$pkg")"
 
-		echo "f${fedora_current} ${pkg}"
-		echo "f${fedora_previous} ${pkg}"
+		for fed_ver in ${REPOBUILDER_RELEASE}; do
+			echo "f${fed_ver} ${pkg}"
+		done
 	done
-) | xargs -P 0 -n 2 ./scripts/build-package.sh
+) | xargs -P "${REPOBUILDER_PARALLEL}" -n 2 ./scripts/build-package.sh
 
 # -- cleanup
 
-message INFO "cleanup" "Removing containers and images"
-podman image rm "localhost/repobuilder-f${fedora_current}" "localhost/repobuilder-f${fedora_previous}" >/dev/null
+if [ "${REPOBUILDER_RM}" -eq "1" ]; then
+	message INFO "cleanup" "Removing containers and images"
+	for fed_ver in "${REPOBUILDER_RELEASE}"; do
+		podman image rm "localhost/repobuilder-f${fed_ver}" >/dev/null
+	done
+fi
 

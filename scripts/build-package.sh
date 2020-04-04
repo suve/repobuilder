@@ -7,6 +7,13 @@ cd "$( dirname "${BASH_SOURCE[0]}" )/../"
 . scripts/messages.sh
 . scripts/volumes.sh
 
-podman run --attach stdout --attach stderr --network none --rm=true \
-	$vol_all "localhost/repobuilder-${dist}" /repobuilder/scripts/rpmbuild.sh "${pkg}"
+if [ "${REPOBUILDER_OUTERNET}" -eq "1" ]; then
+	network="--network bridge"
+else
+	network="--network none"
+fi
+
+podman run --attach stdout --attach stderr --rm=true \
+	$network $vol_all \
+	"localhost/repobuilder-${dist}" /repobuilder/scripts/rpmbuild.sh "${pkg}"
 
