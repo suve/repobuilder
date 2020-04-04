@@ -4,10 +4,6 @@
 . /repobuilder/scripts/messages.sh
 
 pkg="$1"
-if [ "${pkg:0:9}" == "packages/" ]; then
-	pkg="${pkg:9:65535}"
-fi
-
 pkgdir="/repobuilder/packages/${pkg}"
 if [ ! -d "${pkgdir}" ]; then
 	message FAIL "build(${dist}/${pkg})" "No such directory: \"${pkgdir}\""

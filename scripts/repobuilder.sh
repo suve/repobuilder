@@ -23,10 +23,7 @@ echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scr
 message INFO "build" "Building packages..."
 
 (
-	packages="$(find packages/ -mindepth 1 -maxdepth 1 -type d)"
-	for pkg in $packages; do
-		pkg="$(basename "$pkg")"
-
+	for pkg in ${REPOBUILDER_PACKAGE}; do
 		for fed_ver in ${REPOBUILDER_RELEASE}; do
 			echo "f${fed_ver} ${pkg}"
 		done

@@ -4,6 +4,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 REPOBUILDER_FORCE_CLEAN="0"
 REPOBUILDER_NO_REFRESH="0"
+REPOBUILDER_PACKAGE=""
 REPOBUILDER_PARALLEL="0"
 REPOBUILDER_RELEASE=""
 REPOBUILDER_RM="0"
@@ -22,6 +23,9 @@ Available options (in alphabetical order):
   Do not update the container images.
   This can cause your build to fail if you added new packages
   or new BuildRequires to already existing packages.
+--package PKG
+  Instead of all packages inside the package/directory, build only PKG.
+  PKG can be a single name, or multiple names separated with a comma.
 --parallel NUMBER
   Limit the number of simultaneously running containers.
 --release NUMBER
@@ -39,11 +43,14 @@ EOHELP
 		REPOBUILDER_FORCE_CLEAN=1
 	elif [ "$1" == "--norefresh" ] || [ "$1" == "--no-refresh" ]; then
 		REPOBUILDER_NO_REFRESH=1
+	elif [ "$1" == "--package" ]; then
+		REPOBUILDER_PACKAGE="$(echo "$2" | tr ',' ' ')"
+		shift
 	elif [ "$1" == "--parallel" ]; then
 		REPOBUILDER_PARALLEL="$2"
 		shift
 	elif [ "$1" == "--release" ]; then
-		REPOBUILDER_RELEASE="$(tr ',' ' ' "$2")"
+		REPOBUILDER_RELEASE="$(echo "$2" \ tr ',' ' ')"
 		shift
 	elif [ "$1" == "--rm" ]; then
 		REPOBUILDER_RM=1
@@ -57,6 +64,29 @@ EOHELP
 	shift
 done
 
+if [ "${REPOBUILDER_PACKAGE}" == "" ]; then
+	for pkg in $(find packages/ -mindepth 1 -maxdepth 1 -type d); do
+		pkg="$(basename "${pkg}")"
+		REPOBUILDER_PACKAGE="${REPOBUILDER_PACKAGE} ${pkg}"
+
+		if [ ! -f "packages/${pkg}/${pkg}.spec" ]; then
+			echo "repobuilder.sh: The \"packages/${pkg}\" directory does not contain a spec file"
+			exit 1
+		fi
+	done
+else
+	for pkg in ${REPOBUILDER_PACKAGE}; do
+		if [ ! -d "packages/${pkg}" ]; then
+			echo "repobuilder.sh: Cannot find package \"${pkg}\""
+			exit 1
+		fi
+		if [ ! -f "packages/${pkg}/${pkg}.spec" ]; then
+			echo "repobuilder.sh: The \"packages/${pkg}\" directory does not contain a spec file"
+			exit 1
+		fi
+	done
+fi
+
 if [ "${REPOBUILDER_RELEASE}" == "" ]; then
 	. ./scripts/dist.sh
 
@@ -69,7 +99,7 @@ fi
 
 export REPOBUILDER_FORCE_CLEAN
 export REPOBUILDER_NO_REFRESH
-export REPOBUILDER_PARALLEL
+export REPOBUILDER_PACKAGE REPOBUILDER_PARALLEL
 export REPOBUILDER_RELEASE REPOBUILDER_RM
 export REPOBUILDER_OUTERNET
 
