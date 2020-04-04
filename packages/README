@@ -1,0 +1,3 @@
+Put your packages here, each in its own sub-directory.
+
+Each sub-directory should contain the full set of files required to build the package. None of the Source: URLs will be fetched.

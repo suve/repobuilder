@@ -1,0 +1,3 @@
+repobuilder
+--------------------
+A patchwork of shell scripts that allow to build multiple RPM packages in parallel.
