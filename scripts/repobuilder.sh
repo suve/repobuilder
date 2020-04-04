@@ -9,6 +9,13 @@ cd ../
 
 mkdir -p output/
 
+# -- set up some vars for later use
+
+vol_packages="--volume ./packages:/repobuilder/packages:ro,noexec"
+vol_output="--volume ./output:/repobuilder/output:rw,noexec"
+vol_scripts="--volume ./scripts:/repobuilder/scripts:ro,exec"
+vol_all="${vol_packages} ${vol_output} ${vol_scripts}"
+
 # -- pull from container registry
 
 message INFO "image" "Pulling from registry..."
@@ -26,7 +33,7 @@ message OK "image" "Pulled successfully"
 
 message INFO "image" "Building image..."
 
-container=$(podman create --quiet --volume ./:/repobuilder "$source_image" /repobuilder/scripts/install-build-requires.sh)
+container=$(podman create $vol_all --quiet "$source_image" /repobuilder/scripts/install-build-requires.sh)
 if [ "$?" -ne 0 ]; then
 	message FAIL "image" "Failed to create container from image"
 	exit 1
@@ -51,7 +58,7 @@ message OK "image" "Built successfully"
 message INFO "build" "Building packages..."
 
 find packages/ -mindepth 1 -maxdepth 1 -type d | xargs -P 0 -n 1 \
-	podman run --attach stdout --attach stderr --volume ./:/repobuilder --network none --rm=true \
+	podman run --attach stdout --attach stderr $vol_all --network none --rm=true \
 	"$build_image" /repobuilder/scripts/build-package.sh
 
 # -- cleanup
