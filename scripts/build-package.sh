@@ -1,5 +1,6 @@
 #!/bin/bash
 
+. /repobuilder/scripts/dist.sh
 . /repobuilder/scripts/messages.sh
 
 pkg="$1"
@@ -9,12 +10,12 @@ fi
 
 pkgdir="/repobuilder/packages/${pkg}"
 if [ ! -d "${pkgdir}" ]; then
-	message FAIL "build(${pkg})" "No such directory: \"${pkgdir}\"" 
+	message FAIL "build(${dist}/${pkg})" "No such directory: \"${pkgdir}\"" 
 	exit 1
 fi
 
 if [ ! -f "${pkgdir}/${pkg}.spec" ]; then
-	message FAIL "build(${pkg})" "spec file not found: \"${pkgdir}/${pkg}.spec\""
+	message FAIL "build(${dist}/${pkg})" "spec file not found: \"${pkgdir}/${pkg}.spec\""
 	exit 1
 fi
 
@@ -35,9 +36,9 @@ rpmbuild -bb --nodebuginfo "./rpmbuild/SPECS/${pkg}.spec" 1> "${pkg}.build.log" 
 if [ "$?" -ne 0 ]; then
 	cp "${pkg}.build.log" /repobuilder/output/
 
-	message FAIL "build(${pkg})" "rpmbuild failed - check \"${pkg}.build.log\" for details"
+	message FAIL "build(${dist}/${pkg})" "rpmbuild failed - check \"${pkg}.build.log\" for details"
 	exit 1
 fi
 
 find ~/rpmbuild/RPMS/ -name '*.rpm' -exec cp '{}' /repobuilder/output/ ';'
-message OK "build(${pkg})" "Finished successfully"
+message OK "build(${dist}/${pkg})" "Finished successfully"
