@@ -33,6 +33,10 @@ message INFO "build" "Building packages..."
 	done
 ) | xargs -P "${REPOBUILDER_PARALLEL}" -n 2 ./scripts/build-package.sh
 
+# -- create repositories
+
+echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/build-repo.sh
+
 # -- cleanup
 
 if [ "${REPOBUILDER_RM}" -eq "1" ]; then
