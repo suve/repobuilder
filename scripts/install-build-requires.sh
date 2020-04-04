@@ -5,9 +5,26 @@
 
 cd ~
 
+# -- rpmbuild
+
+if [ "$1" != "--reuse" ]; then
+	message INFO "image(${dist})" "Installing rpmbuild and related packages..."
+
+	dnf install --assumeyes --setopt=install_weak_deps=False \
+		findutils make redhat-rpm-config rpm-build rpmdevtools \
+		> dnf.log
+
+	if [ "$?" -ne 0 ]; then
+		cp dnf.log /repobuilder/output/
+		message FAIL "image(${dist})" "Installing rpmbuild failed; check \"dnf.log\" for more info"
+		exit 2
+	fi
+	message OK "image(${dist})" "rpmbuild installed successfully"
+fi
+
 # -- update
 
-message INFO "image(${dist})" "Updating base packages..."
+message INFO "image(${dist})" "Updating packages..."
 
 dnf update --assumeyes --setopt=install_weak_deps=False > dnf.log
 
@@ -17,21 +34,6 @@ if [ "$?" -ne 0 ]; then
 	exit 1
 fi
 message OK "image(${dist})" "Update finished"
-
-# -- rpmbuild
-
-message INFO "image(${dist})" "Installing rpmbuild and related packages..."
-
-dnf install --assumeyes --setopt=install_weak_deps=False \
-	findutils make redhat-rpm-config rpm-build rpmdevtools \
-	> dnf.log
-
-if [ "$?" -ne 0 ]; then
-	cp dnf.log /repobuilder/output/
-	message FAIL "image(${dist})" "Installing rpmbuild failed; check \"dnf.log\" for more info"
-	exit 2
-fi
-message OK "image(${dist})" "rpmbuild installed successfully"
 
 # -- BuildRequires
 

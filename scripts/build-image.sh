@@ -17,32 +17,45 @@ image="localhost/repobuilder-${dist}"
 . scripts/volumes.sh
 mkdir -p "output/${dist}"
 
-# -- check if the build can be skipped
+# -- check if the container image already exists
 
-if [ "${REPOBUILDER_REFRESH}" -eq "0" ]; then
-	if podman image exists "${image}"; then
+if ! podman image exists "${image}"; then
+	source_image="registry.fedoraproject.org/fedora:${fed_ver}"
+	create_options=""
+
+	# fetch the base image if we don't have it
+	if ! podman image exists "${source_image}"; then
+		message INFO "image(${dist})" "Pulling from registry..."
+
+		source_image="registry.fedoraproject.org/fedora:${fed_ver}"
+		podman pull --quiet "$source_image" >/dev/null
+
+		if [ "$?" -ne 0 ]; then
+			message FAIL "image(${dist})" "Failed to pull from registry"
+			exit 1
+		fi
+		message OK "image(${dist})" "Pulled successfully"
+	fi
+
+	verb_continuous="Building"
+	verb_done="Built"
+else
+	if [ "${REPOBUILDER_NO_REFRESH}" -eq "1" ]; then
 		exit
 	fi
+
+	source_image="${image}"
+	create_options="--reuse"
+
+	verb_continuous="Updating"
+	verb_done="Updated"
 fi
-
-# -- pull from container registry
-
-message INFO "image(${dist})" "Pulling from registry..."
-
-source_image="registry.fedoraproject.org/fedora:${fed_ver}"
-podman pull --quiet "$source_image" >/dev/null
-
-if [ "$?" -ne 0 ]; then
-	message FAIL "image(${dist})" "Failed to pull from registry"
-	exit 1
-fi
-message OK "image(${dist})" "Pulled successfully"
 
 # -- get deps
 
-message INFO "image(${dist})" "Building image..."
+message INFO "image(${dist})" "${verb_continuous} image..."
 
-container=$(podman create $vol_all --quiet "$source_image" /repobuilder/scripts/install-build-requires.sh "${dist}")
+container=$(podman create $vol_all --quiet "$source_image" /repobuilder/scripts/install-build-requires.sh $create_options)
 if [ "$?" -ne 0 ]; then
 	message FAIL "image(${dist})" "Failed to create container from image"
 	exit 1
@@ -56,12 +69,12 @@ fi
 # Remove the old image if it exists.
 podman image rm "${image}" >/dev/null 2>/dev/null
 
-if ! podman commit "$container" "${image}" 2>/dev/null; then
+if ! podman commit "$container" "${image}" >/dev/null 2>/dev/null; then
 	podman container rm "$container" >/dev/null 2>/dev/null
 	message FAIL "image(${dist})" "Failed to commit container-based image"
 	exit 1
 fi
 
 podman container rm "$container" >/dev/null 2>/dev/null
-message OK "image(${dist})" "Built successfully"
+message OK "image(${dist})" "${verb_done} successfully"
 
