@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. /repobuilder/scripts/dist.sh
-. /repobuilder/scripts/messages.sh
+. /repobuilder/scripts/utils/dist.sh
+. /repobuilder/scripts/utils/messages.sh
 
 message INFO "repo(${dist})" "Creating repository..."
 if ! createrepo --update /repobuilder/output/ >/dev/null 2>/dev/null; then

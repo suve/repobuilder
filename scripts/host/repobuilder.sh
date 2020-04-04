@@ -1,22 +1,24 @@
 #!/bin/bash
 
-cd "$( dirname "${BASH_SOURCE[0]}" )/.."
-. scripts/messages.sh
+cd "$( dirname "${BASH_SOURCE[0]}" )/../../"
+. scripts/utils/messages.sh
 
 # -- clean if forced to
 
-message INFO "clean" "Removing previously built packages..."
 if [ "${REPOBUILDER_FORCE_CLEAN}" -eq "1" ] && [ -d output/ ]; then
+	message INFO "clean" "Removing previously built packages..."
+	
 	if ! rm -rf output/; then
 		message FAIL "clean" "Failed to remove old builds"
 		exit 1
 	fi
+	
+	message OK "clean" "Old builds removed successfully"
 fi
-message OK "clean" "Old builds removed successfully"
 
 # -- build images
 
-echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/build-image.sh
+echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/build-image.sh
 
 # -- build packages
 
@@ -28,11 +30,11 @@ message INFO "build" "Building packages..."
 			echo "f${fed_ver} ${pkg}"
 		done
 	done
-) | xargs -P "${REPOBUILDER_PARALLEL}" -n 2 ./scripts/build-package.sh
+) | xargs -P "${REPOBUILDER_PARALLEL}" -n 2 ./scripts/host/build-package.sh
 
 # -- create repositories
 
-echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/build-repo.sh
+echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/create-repo.sh
 
 # -- cleanup
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. /repobuilder/scripts/dist.sh
-. /repobuilder/scripts/messages.sh
+. /repobuilder/scripts/utils/dist.sh
+. /repobuilder/scripts/utils/messages.sh
 
 pkg="$1"
 pkgdir="/repobuilder/packages/${pkg}"

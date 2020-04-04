@@ -88,7 +88,7 @@ else
 fi
 
 if [ "${REPOBUILDER_RELEASE}" == "" ]; then
-	. ./scripts/dist.sh
+	. ./scripts/utils/dist.sh
 
 	fedora_current="${fed_ver}"
 	fedora_previous="$(expr "${fed_ver}" - 1)"
@@ -105,10 +105,10 @@ export REPOBUILDER_OUTERNET
 
 # -- call the main script proper
 
-./scripts/repobuilder.sh
+./scripts/host/repobuilder.sh
 
 # -- all done
 
-. ./scripts/messages.sh
+. ./scripts/utils/messages.sh
 echo "All done! Your built packages can be found in the ${ANSI_BOLD}output/${ANSI_RESET} directory."
 

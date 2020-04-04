@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cd "$( dirname "${BASH_SOURCE[0]}" )/../"
-. scripts/messages.sh
+cd "$( dirname "${BASH_SOURCE[0]}" )/../../"
+. scripts/utils/messages.sh
 
 # -- set up some vars for later use
 
@@ -14,7 +14,7 @@ fed_ver="$1"
 dist="f${fed_ver}"
 image="localhost/repobuilder-${dist}"
 
-. scripts/volumes.sh
+. scripts/utils/volumes.sh
 mkdir -p "output/${dist}"
 
 # -- check if the container image already exists
@@ -55,7 +55,7 @@ fi
 
 message INFO "image(${dist})" "${verb_continuous} image..."
 
-container=$(podman create $vol_all --quiet "$source_image" /repobuilder/scripts/install-build-requires.sh $create_options)
+container=$(podman create $vol_all --quiet "$source_image" /repobuilder/scripts/container/install-build-requires.sh $create_options)
 if [ "$?" -ne 0 ]; then
 	message FAIL "image(${dist})" "Failed to create container from image"
 	exit 1
