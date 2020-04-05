@@ -12,6 +12,6 @@ else
 	network="--network none"
 fi
 
-podman run --attach stdout --attach stderr --rm=true \
+podman run --attach=stdout --attach=stderr --pull=never --rm=true \
 	$network $vol_all \
 	"localhost/repobuilder-${dist}" /repobuilder/scripts/container/rpmbuild.sh "${pkg}"
