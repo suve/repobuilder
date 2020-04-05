@@ -1,3 +1,42 @@
 repobuilder
+====================
+A patchwork of shell scripts that allow to build multiple RPM packages
+and yum/dnf repositories in parallel.
+
+Put your packages (i.e. spec files and sources) inside the packages/ directory,
+each package in its own sub-directory. Run the main script to build.
+
+Options
 --------------------
-A patchwork of shell scripts that allow to build multiple RPM packages in parallel.
+--force-clean
+  Remove the output directory at the start.
+--help
+  Display this help message and exit.
+--no-refresh
+  Do not update the container images.
+  This can cause your build to fail if you added new packages
+  or new BuildRequires to already existing packages.
+--package PKG
+  Instead of all packages inside the package/directory, build only PKG.
+  PKG can be a single name, or multiple names separated with a comma.
+--parallel NUMBER
+  Limit the number of simultaneously running containers to NUMBER.
+  The default value is the same as the number of available CPUs.
+  Use 0 for "no limit".
+--release NUMBER
+  Build the packages for the specified Fedora release.
+  You can specify multiple numbers separated by a comma.
+  The default value is "\$N, \$N-1", where \$N is the release you're running.
+--rm
+  Remove the container images after finishing.
+  NOTE: This removes only the rpmbuild images, not the base Fedora images.
+--outernet
+  Allow internet access during builds.
+
+
+Requirements
+--------------------
+- bash
+- find
+- podman
+- xargs

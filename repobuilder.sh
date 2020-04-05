@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 REPOBUILDER_FORCE_CLEAN="0"
 REPOBUILDER_NO_REFRESH="0"
 REPOBUILDER_PACKAGE=""
-REPOBUILDER_PARALLEL="0"
+REPOBUILDER_PARALLEL=""
 REPOBUILDER_RELEASE=""
 REPOBUILDER_RM="0"
 REPOBUILDER_OUTERNET="0"
@@ -27,7 +27,9 @@ Available options (in alphabetical order):
   Instead of all packages inside the package/directory, build only PKG.
   PKG can be a single name, or multiple names separated with a comma.
 --parallel NUMBER
-  Limit the number of simultaneously running containers.
+  Limit the number of simultaneously running containers to NUMBER.
+  The default value is the same as the number of available CPUs.
+  Use 0 for "no limit".
 --release NUMBER
   Build the packages for the specified Fedora release.
   You can specify multiple numbers separated by a comma.
@@ -64,6 +66,8 @@ EOHELP
 	shift
 done
 
+# -- set default values / validate values
+
 if [ "${REPOBUILDER_PACKAGE}" == "" ]; then
 	for pkg in $(find packages/ -mindepth 1 -maxdepth 1 -type d); do
 		pkg="$(basename "${pkg}")"
@@ -87,6 +91,10 @@ else
 	done
 fi
 
+if [ "${REPOBUILDER_PARALLEL}" == "" ]; then
+	REPOBUILDER_PARALLEL="$(nproc)"
+fi
+
 if [ "${REPOBUILDER_RELEASE}" == "" ]; then
 	. ./scripts/utils/dist.sh
 
@@ -96,6 +104,8 @@ if [ "${REPOBUILDER_RELEASE}" == "" ]; then
 
 	REPOBUILDER_RELEASE="${fedora_current} ${fedora_previous}"
 fi
+
+# -- export everything
 
 export REPOBUILDER_FORCE_CLEAN
 export REPOBUILDER_NO_REFRESH
