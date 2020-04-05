@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 . /repobuilder/scripts/utils/dist.sh
 . /repobuilder/scripts/utils/messages.sh

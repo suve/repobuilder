@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 fed_ver="$1"
 dist="f${fed_ver}"

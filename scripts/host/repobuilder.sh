@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 cd "$( dirname "${BASH_SOURCE[0]}" )/../../"
 . scripts/utils/messages.sh
@@ -40,7 +41,7 @@ echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scr
 
 if [ "${REPOBUILDER_RM}" -eq "1" ]; then
 	message INFO "rm" "Removing containers and images"
-	for fed_ver in "${REPOBUILDER_RELEASE}"; do
+	for fed_ver in ${REPOBUILDER_RELEASE}; do
 		podman image rm "localhost/repobuilder-f${fed_ver}" >/dev/null
 	done
 	message OK "rm" "Container images removed successfully"

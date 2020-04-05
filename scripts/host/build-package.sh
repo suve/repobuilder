@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 dist="$1"
 pkg="$2"

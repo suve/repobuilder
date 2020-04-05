@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 . /repobuilder/scripts/utils/dist.sh
 . /repobuilder/scripts/utils/messages.sh
@@ -19,7 +20,7 @@ cd ~
 rpmdev-setuptree
 
 cd "${pkgdir}"
-for file in $(ls ./); do
+for file in *; do
 	if [ "$file" == "${pkg}.spec" ]; then
 		ln -s "${pkgdir}/${file}" ~/rpmbuild/SPECS
 	else

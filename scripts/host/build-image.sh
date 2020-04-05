@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u
 
 cd "$( dirname "${BASH_SOURCE[0]}" )/../../"
 . scripts/utils/messages.sh
