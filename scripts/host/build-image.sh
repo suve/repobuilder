@@ -56,7 +56,7 @@ fi
 
 message INFO "image(${dist})" "${verb_continuous} image..."
 
-container=$(podman create $vol_all --pull=never --quiet "$source_image" /repobuilder/scripts/container/install-build-requires.sh $create_options)
+container=$(podman create $vol_all --pull=never --quiet "$source_image" /repobuilder/scripts/container/install-build-requires.sh $create_options --package "${REPOBUILDER_PACKAGE}")
 if [ "$?" -ne 0 ]; then
 	message FAIL "image(${dist})" "Failed to create container from image"
 	exit 1

@@ -9,8 +9,12 @@ cd ~
 # -- parse args
 
 opt_reuse=0
+packages=""
 while [ "$#" -gt 0 ]; do
-	if [ "$1" == "--reuse" ]; then
+	if [ "$1" == "--package" ]; then
+		packages="$2"
+		shift
+	elif [ "$1" == "--reuse" ]; then
 		opt_reuse=1
 	else
 		message FAIL "image(${dist})" "Unknown option \"$1\" passed to install-build-requires.sh"
@@ -18,6 +22,15 @@ while [ "$#" -gt 0 ]; do
 	fi
 	shift
 done
+
+specfiles=""
+if [ "${packages}" != "" ]; then
+	for pkg in ${packages}; do
+		specfiles="/repobuilder/packages/${pkg}/${pkg}.spec"$'\n'"${specfiles}"
+	done
+else	
+	specfiles="$(find /repobuilder/packages -mindepth 2 -maxdepth 2 -name '*.spec')"
+fi
 
 # -- functions
 
@@ -91,7 +104,7 @@ message OK "image(${dist})" "Update finished ($(dnf_stats))"
 
 message INFO "image(${dist})" "Installing BuildRequires..."
 
-find /repobuilder/packages -mindepth 2 -maxdepth 2 -name '*.spec' | \
+echo "${specfiles}" | \
 	xargs -d $'\n' rpmspec --query --buildrequires | \
 	xargs -d $'\n' dnf install --assumeyes --setopt=install_weak_deps=False \
 	> dnf.log 2>/dev/null
