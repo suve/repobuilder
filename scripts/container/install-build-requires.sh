@@ -6,9 +6,22 @@ set -u
 
 cd ~
 
+# -- parse args
+
+opt_reuse=0
+while [ "$#" -gt 0 ]; do
+	if [ "$1" == "--reuse" ]; then
+		opt_reuse=1
+	else
+		message FAIL "image(${dist})" "Unknown option \"$1\" passed to install-build-requires.sh"
+		exit 1
+	fi
+	shift
+done
+
 # -- rpmbuild
 
-if [ "$1" != "--reuse" ]; then
+if [ "${opt_reuse}" -eq 0 ]; then
 	message INFO "image(${dist})" "Installing createrepo, rpmbuild and other base packages..."
 
 	dnf install --assumeyes --setopt=install_weak_deps=False \
