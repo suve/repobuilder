@@ -13,14 +13,14 @@ fi
 
 fed_ver="$1"
 dist="f${fed_ver}"
-image="localhost/repobuilder-${dist}"
+target_image="localhost/repobuilder-${dist}"
 
 . scripts/utils/volumes.sh
 mkdir -p "output/${dist}"
 
 # -- check if the container image already exists
 
-if ! podman image exists "${image}"; then
+if ! podman image exists "${target_image}"; then
 	source_image="registry.fedoraproject.org/fedora:${fed_ver}"
 	create_options=""
 
@@ -45,7 +45,7 @@ else
 		exit
 	fi
 
-	source_image="${image}"
+	source_image="${target_image}"
 	create_options="--reuse"
 
 	verb_continuous="Updating"
@@ -67,15 +67,15 @@ if ! podman start --attach "$container" 2>/dev/null; then
 	exit 1
 fi
 
-# Remove the old image if it exists.
-podman image rm "${image}" >/dev/null 2>/dev/null
-
-if ! podman commit "$container" "${image}" >/dev/null 2>/dev/null; then
+image_id="$(podman commit "$container" "${target_image}" 2>/dev/null)"
+if [ "$?" -ne 0 ]; then
 	podman container rm "$container" >/dev/null 2>/dev/null
 	message FAIL "image(${dist})" "Failed to commit container-based image"
 	exit 1
 fi
 
-podman container rm "$container" >/dev/null 2>/dev/null
+podman image tag "${image_id}" "${target_image}:$(date --utc +%Y.%m%d.%H%M)" >/dev/null 2>/dev/null
 message OK "image(${dist})" "${verb_done} successfully"
+
+podman container rm "$container" >/dev/null 2>/dev/null
 
