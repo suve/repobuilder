@@ -113,6 +113,26 @@ export REPOBUILDER_PACKAGE REPOBUILDER_PARALLEL
 export REPOBUILDER_RELEASE REPOBUILDER_RM
 export REPOBUILDER_OUTERNET
 
+# -- add a signal handler
+
+. ./scripts/utils/messages.sh
+
+function signal_handler() {
+	message "STOP" "" "$1; killing all containers and child processes..."
+
+	pkill --signal SIGKILL --parent "$$" xargs
+
+	CONTAINERS=$(podman container list | grep 'localhost/repobuilder' | cut -f1 -d' ')
+	echo "${CONTAINERS}" | xargs podman container kill --signal SIGKILL >/dev/null
+	echo "${CONTAINERS}" | xargs podman container rm >/dev/null
+
+	message "STOP" "" "Containers killed; repobuilder stopped"
+	exit 13
+}
+
+trap "signal_handler 'Keyboard interrupt'" SIGINT
+trap "signal_handler 'SIGTERM received'" SIGTERM
+
 # -- call the main script proper
 
 if ! ./scripts/host/repobuilder.sh; then
@@ -121,6 +141,5 @@ fi
 
 # -- all done
 
-. ./scripts/utils/messages.sh
-echo "All done! Your built packages can be found in the ${ANSI_BOLD}output/${ANSI_RESET} directory."
+message "OK" "" "All done! Your built packages can be found in the ${ANSI_BOLD}output/${ANSI_RESET} directory."
 
