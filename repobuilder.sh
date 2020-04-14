@@ -115,7 +115,9 @@ export REPOBUILDER_OUTERNET
 
 # -- call the main script proper
 
-./scripts/host/repobuilder.sh
+if ! ./scripts/host/repobuilder.sh; then
+	exit "$?"
+fi
 
 # -- all done
 

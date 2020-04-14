@@ -11,7 +11,7 @@ if [ "${REPOBUILDER_FORCE_CLEAN}" -eq "1" ] && [ -d output/ ]; then
 	
 	if ! rm -rf output/; then
 		message FAIL "clean" "Failed to remove old builds"
-		exit 1
+		exit 2
 	fi
 	
 	message OK "clean" "Old builds removed successfully"
@@ -19,7 +19,9 @@ fi
 
 # -- build images
 
-echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/build-image.sh
+if ! echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/build-image.sh; then
+	exit 3
+fi
 
 # -- build packages
 
@@ -33,9 +35,16 @@ message INFO "build" "Building packages..."
 	done
 ) | xargs -P "${REPOBUILDER_PARALLEL}" -n 2 ./scripts/host/build-package.sh
 
+if [ "$?" -ne 0 ]; then
+	exit 4
+fi
+
+
 # -- create repositories
 
-echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/create-repo.sh
+if ! echo -n "${REPOBUILDER_RELEASE}" | xargs -P "${REPOBUILDER_PARALLEL}" -n 1 ./scripts/host/create-repo.sh; then
+	exit 5
+fi
 
 # -- cleanup
 
