@@ -6,6 +6,8 @@ ANSI_RED=$(ANSI_COLOUR 31)
 ANSI_GREEN=$(ANSI_COLOUR 32)
 ANSI_YELLOW=$(ANSI_COLOUR 33)
 ANSI_CYAN=$(ANSI_COLOUR 36)
+
+ANSI_LIME=$(ANSI_COLOUR 92)
 ANSI_WHITE=$(ANSI_COLOUR 97)
 
 ANSI_RESET=$(ANSI_COLOUR 0)
@@ -23,6 +25,8 @@ function message() {
 		colour="$ANSI_YELLOW"
 	elif [ "$category" == "INFO" ]; then
 		colour="$ANSI_CYAN"
+	elif [ "$category" == "DONE" ]; then
+		colour="$ANSI_LIME"
 	elif [ "$category" == "OK" ]; then
 		colour="$ANSI_GREEN"
 		category=" OK "

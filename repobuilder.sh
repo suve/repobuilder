@@ -141,5 +141,5 @@ fi
 
 # -- all done
 
-message "OK" "" "All done! Your built packages can be found in the ${ANSI_BOLD}output/${ANSI_RESET} directory."
+message "DONE" "" "All done! Your built packages can be found in the ${ANSI_BOLD}output/${ANSI_RESET} directory."
 
