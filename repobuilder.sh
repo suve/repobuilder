@@ -52,7 +52,7 @@ EOHELP
 		REPOBUILDER_PARALLEL="$2"
 		shift
 	elif [ "$1" == "--release" ]; then
-		REPOBUILDER_RELEASE="$(echo "$2" \ tr ',' ' ')"
+		REPOBUILDER_RELEASE="$(echo "$2" | tr ',' ' ')"
 		shift
 	elif [ "$1" == "--rm" ]; then
 		REPOBUILDER_RM=1
