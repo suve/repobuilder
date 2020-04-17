@@ -15,4 +15,5 @@ fi
 
 podman run --attach=stdout --attach=stderr --pull=never --rm=true \
 	$network $vol_all \
-	"localhost/repobuilder-${dist}" /repobuilder/scripts/container/rpmbuild.sh "${pkg}"
+	"localhost/repobuilder-${dist}" \
+	/repobuilder/scripts/container/rpmbuild.sh "${pkg}" "${REPOBUILDER_DEBUGINFO}"

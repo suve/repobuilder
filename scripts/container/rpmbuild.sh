@@ -5,6 +5,10 @@ set -u
 . /repobuilder/scripts/utils/messages.sh
 
 pkg="$1"
+shift
+
+extra_args="$@"
+
 pkgdir="/repobuilder/packages/${pkg}"
 if [ ! -d "${pkgdir}" ]; then
 	message FAIL "build(${dist}/${pkg})" "No such directory: \"${pkgdir}\""
@@ -29,7 +33,7 @@ for file in *; do
 done
 
 cd ~
-rpmbuild -bb --nodebuginfo "./rpmbuild/SPECS/${pkg}.spec" 1> "${pkg}.build.log" 2>&1
+rpmbuild -bb ${extra_args} "./rpmbuild/SPECS/${pkg}.spec" 1> "${pkg}.build.log" 2>&1
 if [ "$?" -ne 0 ]; then
 	cp "${pkg}.build.log" /repobuilder/output/
 

@@ -6,16 +6,19 @@ and yum/dnf repositories in parallel.
 Put your packages (i.e. spec files and sources) inside the packages/ directory,
 each package in its own sub-directory. Run the main script to build.
 
+
 Options
 --------------------
 --force-clean
   Remove the output directory at the start.
 --help
-  Display this help message and exit.
+  Print a help message and exit.
 --no-refresh
   Do not update the container images.
   This can cause your build to fail if you added new packages
   or new BuildRequires to already existing packages.
+--outernet
+  Allow internet access during builds.
 --package PKG
   Instead of all packages inside the package/directory, build only PKG.
   PKG can be a single name, or multiple names separated with a comma.
@@ -26,17 +29,21 @@ Options
 --release NUMBER
   Build the packages for the specified Fedora release.
   You can specify multiple numbers separated by a comma.
-  The default value is "\$N, \$N-1", where \$N is the release you're running.
+  The default value is "$N, $N-1", where \$N is the release you're running.
 --rm
   Remove the container images after finishing.
-  NOTE: This removes only the rpmbuild images, not the base Fedora images.
---outernet
-  Allow internet access during builds.
+  NOTE: This removes only repobuilder's images, not the base Fedora images.
+--version
+  Print version information and exit.
+--with-debuginfo
+  Enable debuginfo generation.
+  By default, building debuginfo packages is disabled.
 
 
 Requirements
 --------------------
 - bash
 - find
+- pkill
 - podman
 - xargs

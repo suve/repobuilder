@@ -2,6 +2,7 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+REPOBUILDER_DEBUGINFO="--nodebuginfo"
 REPOBUILDER_FORCE_CLEAN="0"
 REPOBUILDER_NO_REFRESH="0"
 REPOBUILDER_OUTERNET="0"
@@ -41,6 +42,9 @@ Available options (in alphabetical order):
   NOTE: This removes only repobuilder's images, not the base Fedora images.
 --version
   Display version information and exit.
+--with-debuginfo
+  Enable debuginfo generation.
+  By default, building debuginfo packages is disabled.
 EOHELP
 		exit
 	elif [ "$1" == "--forceclean" ] || [ "$1" == "--force-clean" ]; then
@@ -64,6 +68,8 @@ EOHELP
 		. ./scripts/utils/version.sh
 		echo "repobuilder v.${REPOBUILDER_VERSION} by suve"
 		exit
+	elif [ "$1" == "--with-debuginfo" ] || [ "$1" == "--with-debug-info" ]; then
+		REPOBUILDER_DEBUGINFO=""
 	else
 		echo "repobuilder.sh: Unrecognized argument \"$1\""
 		exit 1
@@ -113,6 +119,7 @@ fi
 
 # -- export everything
 
+export REPOBUILDER_DEBUGINFO
 export REPOBUILDER_FORCE_CLEAN
 export REPOBUILDER_NO_REFRESH
 export REPOBUILDER_OUTERNET
