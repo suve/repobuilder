@@ -62,10 +62,24 @@ if [ "$?" -ne 0 ]; then
 	exit 1
 fi
 
-if ! podman start --attach "$container" 2>/dev/null; then
+podman start --attach "$container" 2>/dev/null
+dnf_status="$?"
+
+# install-build-requires.sh breaks the "0 = success, everything else = fail" convention
+# exitcode 1 is to be considered a success
+if [ "${dnf_status}" -gt 1 ]; then
 	message FAIL "image(${dist})" "Failed to run the container"
 	exit 1
 fi
+
+# install-build-requires emits a 0 exitcode if no packages were installed/updated
+if [ "${dnf_status}" -eq 0 ]; then
+	message OK "image(${dist})" "No changes in packages; image is up to date"
+	podman container rm "$container" >/dev/null 2>/dev/null
+	exit 0
+fi
+
+message INFO "image(${dist})" "Committing container image..."
 
 image_id="$(podman commit "$container" "${target_image}" 2>/dev/null)"
 if [ "$?" -ne 0 ]; then
