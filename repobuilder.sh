@@ -4,11 +4,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 REPOBUILDER_FORCE_CLEAN="0"
 REPOBUILDER_NO_REFRESH="0"
+REPOBUILDER_OUTERNET="0"
 REPOBUILDER_PACKAGE=""
 REPOBUILDER_PARALLEL=""
 REPOBUILDER_RELEASE=""
 REPOBUILDER_RM="0"
-REPOBUILDER_OUTERNET="0"
 
 while [ "$#" -gt 0 ]; do
 	if [ "$1" == "--help" ]; then
@@ -23,6 +23,8 @@ Available options (in alphabetical order):
   Do not update the container images.
   This can cause your build to fail if you added new packages
   or new BuildRequires to already existing packages.
+--outernet
+  Allow internet access during builds.
 --package PKG
   Instead of all packages inside the package/directory, build only PKG.
   PKG can be a single name, or multiple names separated with a comma.
@@ -36,15 +38,17 @@ Available options (in alphabetical order):
   The default value is "\$N, \$N-1", where \$N is the release you're running.
 --rm
   Remove the container images after finishing.
-  NOTE: This removes only the rpmbuild images, not the base Fedora images.
---outernet
-  Allow internet access during builds.
+  NOTE: This removes only repobuilder's images, not the base Fedora images.
+--version
+  Display version information and exit.
 EOHELP
 		exit
 	elif [ "$1" == "--forceclean" ] || [ "$1" == "--force-clean" ]; then
 		REPOBUILDER_FORCE_CLEAN=1
 	elif [ "$1" == "--norefresh" ] || [ "$1" == "--no-refresh" ]; then
 		REPOBUILDER_NO_REFRESH=1
+	elif [ "$1" == "--outernet" ]; then
+		REPOBUILDER_OUTERNET=1
 	elif [ "$1" == "--package" ]; then
 		REPOBUILDER_PACKAGE="$(echo "$2" | tr ',' ' ')"
 		shift
@@ -56,8 +60,10 @@ EOHELP
 		shift
 	elif [ "$1" == "--rm" ]; then
 		REPOBUILDER_RM=1
-	elif [ "$1" == "--outernet" ]; then
-		REPOBUILDER_OUTERNET=1
+	elif [ "$1" == "--version" ]; then
+		. ./scripts/utils/version.sh
+		echo "repobuilder v.${REPOBUILDER_VERSION} by suve"
+		exit
 	else
 		echo "repobuilder.sh: Unrecognized argument \"$1\""
 		exit 1
@@ -109,9 +115,9 @@ fi
 
 export REPOBUILDER_FORCE_CLEAN
 export REPOBUILDER_NO_REFRESH
+export REPOBUILDER_OUTERNET
 export REPOBUILDER_PACKAGE REPOBUILDER_PARALLEL
 export REPOBUILDER_RELEASE REPOBUILDER_RM
-export REPOBUILDER_OUTERNET
 
 # -- add a signal handler
 
