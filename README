@@ -1,26 +1,37 @@
 repobuilder
 ====================
 A patchwork of shell scripts that allow to build multiple RPM packages
-and yum/dnf repositories in parallel.
+and yum/dnf repositories, for multiple Fedora releases, in parallel.
 
+
+Usage
+--------------------
 Put your packages (i.e. spec files and sources) inside the packages/ directory,
-each package in its own sub-directory. Run the main script to build.
+each package in its own sub-directory. You MUST include the sources;
+no Source: URLs specified in the spec will be fetched.
+
+Run the main script to build.
+Built packages will be put in the output/ directory.
 
 
 Options
 --------------------
+--builder-skip
+  Do not perform the "install BuildRequires" step in the builder container.
+  This can be useful if you're rebuilding some packages and you're 100% sure
+  that the builder containers already contain all the dependencies.
+  NOTE: This option will be ignored if the builder container does not exist.
+--builder-update
+  Update all packages in the container images.
+  Normally, only direct dependencies of the packages being built are updated.
 --force-clean
   Remove the output directory at the start.
 --help
   Print a help message and exit.
---no-refresh
-  Do not update the container images.
-  This can cause your build to fail if you added new packages
-  or new BuildRequires to already existing packages.
 --outernet
   Allow internet access during builds.
 --package PKG
-  Instead of all packages inside the package/directory, build only PKG.
+  Instead of all packages inside the package/ directory, build only PKG.
   PKG can be a single name, or multiple names separated with a comma.
 --parallel NUMBER
   Limit the number of simultaneously running containers to NUMBER.
@@ -29,7 +40,7 @@ Options
 --release NUMBER
   Build the packages for the specified Fedora release.
   You can specify multiple numbers separated by a comma.
-  The default value is "$N, $N-1", where \$N is the release you're running.
+  The default value is "$N, $N-1", where $N is the release you're running.
 --rm
   Remove the container images after finishing.
   NOTE: This removes only repobuilder's images, not the base Fedora images.

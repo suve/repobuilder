@@ -2,9 +2,10 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+REPOBUILDER_BUILDER_SKIP="0"
+REPOBUILDER_BUILDER_UPDATE="0"
 REPOBUILDER_DEBUGINFO="--nodebuginfo"
 REPOBUILDER_FORCE_CLEAN="0"
-REPOBUILDER_NO_REFRESH="0"
 REPOBUILDER_OUTERNET="0"
 REPOBUILDER_PACKAGE=""
 REPOBUILDER_PARALLEL=""
@@ -16,18 +17,22 @@ while [ "$#" -gt 0 ]; do
 cat <<EOHELP
 Usage: repobuilder.sh [OPTIONS...]
 Available options (in alphabetical order):
+--builder-skip
+  Do not perform the "install BuildRequires" step in the builder container.
+  This can be useful if you're rebuilding some packages and you're 100% sure
+  that the builder containers already contain all the dependencies.
+  NOTE: This option will be ignored if the builder container does not exist.
+--builder-update
+  Update all packages in the container images.
+  Normally, only direct dependencies of the packages being built are updated.
 --force-clean
   Remove the output directory at the start.
 --help
   Display this help message and exit.
---no-refresh
-  Do not update the container images.
-  This can cause your build to fail if you added new packages
-  or new BuildRequires to already existing packages.
 --outernet
   Allow internet access during builds.
 --package PKG
-  Instead of all packages inside the package/directory, build only PKG.
+  Instead of all packages inside the package/ directory, build only PKG.
   PKG can be a single name, or multiple names separated with a comma.
 --parallel NUMBER
   Limit the number of simultaneously running containers to NUMBER.
@@ -47,10 +52,12 @@ Available options (in alphabetical order):
   By default, building debuginfo packages is disabled.
 EOHELP
 		exit
-	elif [ "$1" == "--forceclean" ] || [ "$1" == "--force-clean" ]; then
+	elif [ "$1" == "--builder-skip" ]; then
+		REPOBUILDER_BUILDER_SKIP=1
+	elif [ "$1" == "--builder-update" ]; then
+		REPOBUILDER_BUILDER_UPDATE=1
+	elif [ "$1" == "--force-clean" ]; then
 		REPOBUILDER_FORCE_CLEAN=1
-	elif [ "$1" == "--norefresh" ] || [ "$1" == "--no-refresh" ]; then
-		REPOBUILDER_NO_REFRESH=1
 	elif [ "$1" == "--outernet" ]; then
 		REPOBUILDER_OUTERNET=1
 	elif [ "$1" == "--package" ]; then
@@ -79,6 +86,11 @@ EOHELP
 done
 
 # -- set default values / validate values
+
+if [ "${REPOBUILDER_BUILDER_SKIP}" -eq 1 ] && [ "${REPOBUILDER_BUILDER_UPDATE}" -eq 1 ]; then
+	echo "repobuilder.sh: Conflicting options specified: --builder-skip and --builder-update"
+	exit 1
+fi
 
 if [ "${REPOBUILDER_PACKAGE}" == "" ]; then
 	for pkg in $(find packages/ -mindepth 1 -maxdepth 1 -type d); do
@@ -119,9 +131,9 @@ fi
 
 # -- export everything
 
+export REPOBUILDER_BUILDER_SKIP REPOBUILDER_BUILDER_UPDATE
 export REPOBUILDER_DEBUGINFO
 export REPOBUILDER_FORCE_CLEAN
-export REPOBUILDER_NO_REFRESH
 export REPOBUILDER_OUTERNET
 export REPOBUILDER_PACKAGE REPOBUILDER_PARALLEL
 export REPOBUILDER_RELEASE REPOBUILDER_RM

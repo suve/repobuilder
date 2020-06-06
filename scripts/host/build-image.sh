@@ -41,12 +41,16 @@ if ! podman image exists "${target_image}"; then
 	verb_continuous="Building"
 	verb_done="Built"
 else
-	if [ "${REPOBUILDER_NO_REFRESH}" -eq "1" ]; then
+	if [ "${REPOBUILDER_BUILDER_SKIP}" -eq "1" ]; then
 		exit
 	fi
 
 	source_image="${target_image}"
+
 	create_options="--reuse"
+	if [ "${REPOBUILDER_BUILDER_UPDATE}" -eq "1" ]; then
+		create_options="${create_options} --update"
+	fi
 
 	verb_continuous="Updating"
 	verb_done="Updated"

@@ -13,12 +13,15 @@ cd ~
 # -- parse args
 
 opt_reuse=0
+opt_update=0
 packages=""
 while [ "$#" -gt 0 ]; do
 	if [ "$1" == "--package" ]; then
 		packages="$2"
 		shift
 	elif [ "$1" == "--reuse" ]; then
+		opt_reuse=1
+	elif [ "$1" == "--update" ]; then
 		opt_reuse=1
 	else
 		message FAIL "image(${dist})" "Unknown option \"$1\" passed to install-build-requires.sh"
@@ -106,18 +109,20 @@ fi
 
 # -- update
 
-message INFO "image(${dist}/pkgs)" "Updating all packages..."
+if [ "${opt_update}" -eq 1 ]; then
+	message INFO "image(${dist}/pkgs)" "Updating all packages..."
 
-dnf update --assumeyes --setopt=install_weak_deps=False > dnf.log
+	dnf update --assumeyes --setopt=install_weak_deps=False > dnf.log
 
-if [ "$?" -ne 0 ]; then
-	cp dnf.log /repobuilder/output/
-	message FAIL "image(${dist}/pkgs)" "Update failed; check \"dnf.log\" for more info"
-	exit 12
+	if [ "$?" -ne 0 ]; then
+		cp dnf.log /repobuilder/output/
+		message FAIL "image(${dist}/pkgs)" "Update failed; check \"dnf.log\" for more info"
+		exit 12
+	fi
+
+	calc_dnf_stats
+	message OK "image(${dist}/pkgs)" "Update finished (${DNF_STATS})"
 fi
-
-calc_dnf_stats
-message OK "image(${dist}/pkgs)" "Update finished (${DNF_STATS})"
 
 # -- BuildRequires
 
@@ -125,7 +130,7 @@ message INFO "image(${dist}/pkgs)" "Installing BuildRequires..."
 
 echo "${specfiles}" | \
 	xargs -d $'\n' rpmspec --query --buildrequires 2>/dev/null | \
-	xargs -d $'\n' dnf install --assumeyes --setopt=install_weak_deps=False \
+	xargs -d $'\n' dnf install --best --assumeyes --setopt=install_weak_deps=False \
 	> dnf.log 2>/dev/null
 
 if [ "$?" -ne 0 ]; then
