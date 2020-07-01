@@ -81,7 +81,7 @@ function calc_dnf_stats() {
 		DNF_INSTALLED=$(expr "${DNF_INSTALLED}" '+' "${installed}")
 	fi
 	if [ "${upgraded}" -gt 0 ]; then
-		DNF_UPGRADED=$(expr "${DNF_UPDATED}" '+' "${upgraded}")
+		DNF_UPGRADED=$(expr "${DNF_UPGRADED}" '+' "${upgraded}")
 	fi
 
 	rm /var/log/dnf.log
